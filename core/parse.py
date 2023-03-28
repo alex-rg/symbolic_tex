@@ -204,6 +204,10 @@ if __name__ == "__main__":
         "--keep_json",
         help="keeps data.json after running", action="store_true"
     )
+    parser.add_argument(
+        "--test_mode",
+        help="renames output file to test.tex (will be deletep)", action="store_true"
+    )
     args = parser.parse_args()
 
     tex_f = args.file
@@ -234,8 +238,8 @@ if __name__ == "__main__":
         f.write(all_code)
         f.close()
 
-    
-    res = subprocess.check_output(["python3", "run_prog.py"], text=True)[:-1]
+    # ./.venv/bin/python - для отладки
+    res = subprocess.check_output(["./.venv/bin/python", "run_prog.py"], text=True)[:-1]
     
     import json
     with open('data.json', 'r') as fp:
@@ -260,7 +264,10 @@ if __name__ == "__main__":
 
             new_text = new_text.replace(cur_code[i].get_section(), "", 1)
 
-    new_name = tex_f.replace(".", "_new.")
+    if args.test_mode:
+        new_name = "test.tex"
+    else:
+        new_name = tex_f.replace(".", "_new.")
 
     with open(new_name, "w") as f:
 

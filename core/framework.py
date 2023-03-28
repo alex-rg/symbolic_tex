@@ -172,12 +172,15 @@ class TexMathOp(object):
 
 class TexSymbol(TexMathOp):
     """
-    inheritance from TexMathOp - math ops for symbols
+    Class, meant to create and use different kind of symbols.\n
+    ### Init args:
+        arg: str - symbol to be represented
+    ### Examples:\n 
+        x = TexSymbol('x')
     """
 
     def hat(self):
-        #return sympy.symbols(self.base_name + 'hat')
-        #self.base_name += 'hat'
+        
         self.sym = sympy.symbols(self.base_name + 'hat')
         return self
 
@@ -239,15 +242,29 @@ class TexSymbol(TexMathOp):
 
 
 class TexExpr(TexMathOp):
-    """docstring for TexExpr"""
-    def __init__(self, arg, str=None):
+    """
+    Class, generated after any arithmetic operation to basic object (TexSymbol, TexFraction etc.). Less likely to be 
+    initialized directly by user then by operations with basic objects.\n
+    ### Init args:
+        ```arg: str``` - expression to be represented
+    ### Examples:\n 
+    ```
+        x = TexSymbol('x')
+        y = TexSymbol('y')
+        expr1 = (x + y*2)
+
+        expr2 = TexExpr("x + y*2")   # may lead to some errors
+    ```
+    """
+    
+    def __init__(self, arg, str_=None):
         #super(TexExpr, self).__init__()
 
         if type(arg) == str:
             self.expr = sympy.sympify(arg)
-
-        self.expr = arg
-        self.polis = str
+        else:
+            self.expr = arg
+        self.polis = str_
 
     def get_str(self):
         return self.polis
@@ -260,9 +277,22 @@ class TexExpr(TexMathOp):
 
     def __str__(self):
         return self.expr.__str__()
+    
+    def float(self, lim=None):
+
+        if (type(self.expr) == int or type(self.expr) == float or 
+            type(self.expr) == sympy.core.numbers.Float or
+            type(self.expr) == sympy.core.numbers.Integer):
+            return TexNumber(self.expr).float(lim)
+        
+        else:
+            return None ##
+        
+    #def __call__(self, x):
+    #    return self.expr.subs()
 
 class TexNumber(TexMathOp):
-    """docstring for TexNumber"""
+    """docstring for TexNumber333"""
     def __init__(self, arg):
         #super(TexNumber, self).__init__()
 
@@ -327,7 +357,85 @@ class TexFraction(TexMathOp):
     def __str__(self):
         return self.num.__str__()
 
-classes = [TexFraction, TexNumber, TexExpr, TexSymbol]
+class TexMatrix(TexMathOp):
+    """docstring for TexMatrix"""
+    def __init__(self, arg):
+        #super(TexNumber, self).__init__()
+
+        self.mat = sympy.Matrix(sympy.sympify(str(arg)))
+        self.str = str(self.mat)            ##проблема
+        self.brackets = '[]'
+
+    def get_str(self):
+        return [self.str]
+
+    def get_val(self):
+        return self.mat
+    
+    def round_brackets(self):
+        self.brackets = '()'
+        return self
+    
+    def straight_brackets(self):
+        self.brackets = '||'
+        return self
+    
+    def __repr__(self):
+        return self.mat.__repr__()
+
+    def __str__(self):
+        return self.mat.__str__()
+    
+
+class TexFunction(TexMathOp):
+
+    def __init__(self, name = 'f', f_args = None, val = None):
+
+        self.name = name
+        self.f_args = f_args
+        self.d_cnt = 0
+        self.val = val
+
+        if val == None:
+            self.ftype = 'unvalued'
+            if f_args != None:
+                self.func = sympy.Function(name)(*f_args)
+            else:
+                self.func = sympy.Function(name)
+        else:
+            self.ftype = 'valued'
+            self.func = TexExpr(val)
+
+        self.str = str(self.func)
+
+    def drop_arg(self):
+        return sympy.Function(self.name)
+    
+    def diff(self, *args):
+        return self.func.diff(*args)
+    
+    def d(self, n=1):
+        self.d_cnt = n
+        return self
+        
+    def get_str(self):
+        return [self.str]
+
+    def get_val(self):
+        return self.func
+    
+    def __repr__(self):
+        return self.func.__repr__()
+
+    def __str__(self):
+        return self.func.__str__()
+    
+    def __call__(self, x):
+    
+        return TexExpr(self.val).expr.subs(self.f_args[0], x)
+
+
+classes = [TexFraction, TexNumber, TexExpr, TexSymbol, TexMatrix, TexFunction]
 
 """
 to do:
@@ -357,4 +465,35 @@ def latex(x):
     if x._slash:
         text = text.replace('\\frac', '\\sfrac')
     return text
+
+@dispatch(TexMatrix)
+def latex(x):
+    
+    if x.brackets == '()':
+        return sympy.latex(x.get_val(), mat_delim='(', mat_str='matrix')
+    elif x.brackets == '||':
+        return sympy.latex(sympy.Determinant(sympy.Matrix(x.get_val())), mat_delim='')
+
+    return sympy.latex(x.get_val())
+
+@dispatch(TexFunction)
+def latex(x):
+
+    if x.d_cnt:
+        # может быть просто функция, но если название функции из 2 или больше букв - operatorname
+        str_ = sympy.latex(x.func)
+        tmp = str_.find(x.name) + len(x.name) - 1
+
+        if x.d_cnt > 3:
+            diff_deg = "^{(" + str(x.d_cnt) + ")}"
+        else:
+            diff_deg = "'"*x.d_cnt
+
+        if tmp + 1 < len(str_) and str_[tmp + 1] == '}':
+            return str_[:tmp + 2] + diff_deg + str_[tmp + 2:]
+        else:
+            return str_[:tmp + 1] + diff_deg + str_[tmp + 1:]
+    
+    return sympy.latex(x.func)
+
 

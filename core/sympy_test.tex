@@ -31,18 +31,21 @@ Your abstract.
 \section{Introduction}
 
 $\codep{
-x = TexFraction('x/y').slash()
-x
+f1 = TexFunction(name='f1', f_args=['x'], val='sin(x)')
+f1(0)
 }$
 
 $\codep{
-x = TexSymbol('x').hat()
-y = TexSymbol('y').hat()
-expr = (x + y) ** y
-expr
+TexExpr("x + y*2")
 }$
 
-Your introduction goes here! Simply start writing your document and use the Recompile button to view the updated PDF preview. Examples of commonly used commands and features are listed below, $\codep{expr}$ to help you get started.
+$\codep{
+y1 = TexFraction('3/4')
+y2 = TexFraction('1/2')
+y1+y2
+}$
+
+Your introduction goes here! Simply start writing your document and use the Recompile button to view the updated PDF preview. Examples of commonly used commands and features are listed below, to help you get started.
 
 $\codep{
 x = TexSymbol('x').dot()
