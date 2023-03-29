@@ -30,14 +30,40 @@ Your abstract.
 
 \section{Introduction}
 
-$\codep{
-f1 = TexFunction(name='f1', f_args=['x'], val='sin(x)')
-f1(0)
-}$
+\codep{
+x = TexSymbol('x').dot()
+y = TexSymbol('y')
+z = TexSymbol('z')
+t = TexSymbol('t')
+expr = (y+x)*(z+y)
+expr.strict()
+expr
+}
 
-$\codep{
-TexExpr("x + y*2")
-}$
+\codep{
+x = TexMatrix('[[1, -1], [3, 4]]')
+y = TexMatrix('[[1, 0], [0, 0]]')
+expr = ((y+x)*2).strict()
+#expr.strict()
+expr
+}
+
+\codep{
+x = TexSymbol('x').dot()
+y = TexSymbol('y')
+z = TexSymbol('z')
+t = TexSymbol('t')
+expr = (y+x)*(z+x**t)/y+x
+expr.strict()
+expr
+#expr
+}
+
+\code{
+F = TexFunction(name='F', f_args=['x'], val='sin(x)')
+G = TexFunction(name='G')
+}
+Найдем значение функции F в точке 0: $F(0) = \codep{F(0)}$; производная F равна $\codep{F.diff()}$
 
 $\codep{
 y1 = TexFraction('3/4')

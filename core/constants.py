@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import platform
 
 runprog_code = [
 """
@@ -22,3 +23,10 @@ except:
 ]
 
 tex_comms = ["\\long\\def\\code#1{}", "\\long\\def\\codep#1{}"]
+
+def interpreter():
+    if platform.system() == 'Windows':
+        return "python"
+    else:
+        ".venv/bin/python"
+    

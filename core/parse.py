@@ -212,7 +212,7 @@ if __name__ == "__main__":
 
     tex_f = args.file
 
-    with open(tex_f) as f:
+    with open(tex_f, encoding = 'utf-8') as f:
         text = f.read()
 
     text = delete_coms_def(text)
@@ -239,7 +239,7 @@ if __name__ == "__main__":
         f.close()
 
     # ./.venv/bin/python - для отладки
-    res = subprocess.check_output(["./.venv/bin/python", "run_prog.py"], text=True)[:-1]
+    res = subprocess.check_output([interpreter(), "run_prog.py"], text=True)[:-1]
     
     import json
     with open('data.json', 'r') as fp:
@@ -269,7 +269,7 @@ if __name__ == "__main__":
     else:
         new_name = tex_f.replace(".", "_new.")
 
-    with open(new_name, "w") as f:
+    with open(new_name, encoding='utf-8', mode="w") as f:
 
         f.write(new_text)
         f.close()

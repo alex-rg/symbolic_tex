@@ -2,7 +2,10 @@ import sympy
 import itertools
 from sympy import latex
 from multipledispatch import dispatch
+from rpn_to_infix import *
 
+#prec_dict =  {'^':4, '*':3, '/':3, '+':2, '-':2}
+#assoc_dict = {'^':1, '*':0, '/':0, '+':0, '-':0}
 class TexMathOp(object):
     """basic math ops for symbolic objects"""
     def __init__(self, arg):
@@ -20,7 +23,7 @@ class TexMathOp(object):
 
         if type(other) in classes:
             return TexExpr(self.get_val() + other.get_val(), 
-                           self.get_str() + other.get_str() + ['+'])
+                           [*self.get_polis(), *other.get_polis(), '+'])#self.get_str() + other.get_str() + ['+'])
         else:
             return TexExpr(self.get_val() + sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['+'])
@@ -28,7 +31,7 @@ class TexMathOp(object):
     def __pow__(self, other):
         if type(other) in classes:
             return TexExpr(self.get_val() ** other.get_val(), 
-                           self.get_str() + other.get_str() + ['**'])
+                           [*self.get_polis(), *other.get_polis(), '**'])#self.get_str() + other.get_str() + ['**'])
         else:
             return TexExpr(self.get_val() ** sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['**'])
@@ -36,7 +39,7 @@ class TexMathOp(object):
     def __sub__(self, other):
         if type(other) in classes:
             return TexExpr(self.get_val() - other.get_val(), 
-                           self.get_str() + other.get_str() + ['-'])
+                           [*self.get_polis(), *other.get_polis(), '-'])#self.get_str() + other.get_str() + ['-'])
         else:
             return TexExpr(self.get_val() + sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['-'])
@@ -44,7 +47,7 @@ class TexMathOp(object):
     def __mul__(self, other):
         if type(other) in classes:
             return TexExpr(self.get_val() * other.get_val(), 
-                           self.get_str() + other.get_str() + ['*'])
+                           [*self.get_polis(), *other.get_polis(), '*'])#self.get_str() + other.get_str() + ['*'])
         else:
             return TexExpr(self.get_val() * sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['*'])
@@ -52,7 +55,7 @@ class TexMathOp(object):
     def __truediv__(self, other):
         if type(other) in classes:
             return TexExpr(self.get_val() / other.get_val(), 
-                           self.get_str() + other.get_str() + ['/'])
+                           [*self.get_polis(), *other.get_polis(), '/'])#self.get_str() + other.get_str() + ['/'])
         else:
             return TexExpr(self.get_val() / sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['/'])
@@ -60,7 +63,7 @@ class TexMathOp(object):
     def __floordiv__(self, other):
         if type(other) in classes:
             return TexExpr(self.get_val() // other.get_val(), 
-                           self.get_str() + other.get_str() + ['//'])
+                           [*self.get_polis(), *other.get_polis(), '//'])#self.get_str() + other.get_str() + ['//'])
         else:
             return TexExpr(self.get_val() // sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['//'])
@@ -68,7 +71,7 @@ class TexMathOp(object):
     def __mod__(self, other):
         if type(other) in classes:
             return TexExpr(self.get_val() % other.get_val(), 
-                           self.get_str() + other.get_str() + ['%'])
+                           [*self.get_polis(), *other.get_polis(), '%'])#self.get_str() + other.get_str() + ['%'])
         else:
             return TexExpr(self.get_val() % sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['%'])
@@ -76,7 +79,7 @@ class TexMathOp(object):
     def __rshift__(self, other):
         if type(other) in classes:
             return TexExpr(self.get_val() >> other.get_val(), 
-                           self.get_str() + other.get_str() + ['>>'])
+                           [*self.get_polis(), *other.get_polis(), '>>'])#self.get_str() + other.get_str() + ['>>'])
         else:
             return TexExpr(self.get_val() >> sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['>>'])
@@ -84,7 +87,7 @@ class TexMathOp(object):
     def __lshift__(self, other):
         if type(other) in classes:
             return TexExpr(self.get_val() << other.get_val(), 
-                           self.get_str() + other.get_str() + ['<<'])
+                           [*self.get_polis(), *other.get_polis(), '<<'])#self.get_str() + other.get_str() + ['<<'])
         else:
             return TexExpr(self.get_val() << sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['<<'])
@@ -92,7 +95,7 @@ class TexMathOp(object):
     def __and__(self, other):
         if type(other) in classes:
             return TexExpr(self.get_val() & other.get_val(), 
-                           self.get_str() + other.get_str() + ['&'])
+                           [*self.get_polis(), *other.get_polis(), '&'])#self.get_str() + other.get_str() + ['&'])
         else:
             return TexExpr(self.get_val() & sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['&'])
@@ -100,7 +103,7 @@ class TexMathOp(object):
     def __or__(self, other):
         if type(other) in classes:
             return TexExpr(self.get_val() | other.get_val(), 
-                           self.get_str() + other.get_str() + ['|'])
+                           [*self.get_polis(), *other.get_polis(), '|'])#self.get_str() + other.get_str() + ['|'])
         else:
             return TexExpr(self.get_val() | sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['|'])
@@ -108,7 +111,7 @@ class TexMathOp(object):
     def __xor__(self, other):
         if type(other) in classes:
             return TexExpr(self.get_val() ^ other.get_val(), 
-                           self.get_str() + other.get_str() + ['^'])
+                           [*self.get_polis(), *other.get_polis(), '^'])#self.get_str() + other.get_str() + ['^'])
         else:
             return TexExpr(self.get_val() ^ sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['^'])
@@ -116,7 +119,7 @@ class TexMathOp(object):
     def __lt__(self, other):
         if type(other) in classes:
             return TexExpr(self.get_val() < other.get_val(), 
-                           self.get_str() + other.get_str() + ['<'])
+                           [*self.get_polis(), *other.get_polis(), '<'])#self.get_str() + other.get_str() + ['<'])
         else:
             return TexExpr(self.get_val() < sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['<'])
@@ -124,7 +127,7 @@ class TexMathOp(object):
     def __le__(self, other):
         if type(other) in classes:
             return TexExpr(self.get_val() <= other.get_val(), 
-                           self.get_str() + other.get_str() + ['<='])
+                           [*self.get_polis(), *other.get_polis(), '<='])#self.get_str() + other.get_str() + ['<='])
         else:
             return TexExpr(self.get_val() <= sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['<='])
@@ -132,7 +135,7 @@ class TexMathOp(object):
     def __gt__(self, other):
         if type(other) in classes:
             return TexExpr(self.get_val() > other.get_val(), 
-                           self.get_str() + other.get_str() + ['>'])
+                           [*self.get_polis(), *other.get_polis(), '>'])#self.get_str() + other.get_str() + ['>'])
         else:
             return TexExpr(self.get_val() > sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['>'])
@@ -140,7 +143,7 @@ class TexMathOp(object):
     def __ge__(self, other):
         if type(other) in classes:
             return TexExpr(self.get_val() >= other.get_val(), 
-                           self.get_str() + other.get_str() + ['>='])
+                           [*self.get_polis(), *other.get_polis(), '>='])#self.get_str() + other.get_str() + ['>='])
         else:
             return TexExpr(self.get_val() >= sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['>='])
@@ -148,7 +151,7 @@ class TexMathOp(object):
     def __eq__(self, other):
         if type(other) in classes:
             return TexExpr(self.get_val() == other.get_val(), 
-                           self.get_str() + other.get_str() + ['=='])
+                           [*self.get_polis(), *other.get_polis(), '=='])#self.get_str() + other.get_str() + ['=='])
         else:
             return TexExpr(self.get_val() == sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['=='])
@@ -156,19 +159,19 @@ class TexMathOp(object):
     def __ne__(self, other):
         if type(other) in classes:
             return TexExpr(self.get_val() != other.get_val(), 
-                           self.get_str() + other.get_str() + ['!='])
+                           [*self.get_polis(), *other.get_polis(), '!='])#self.get_str() + other.get_str() + ['!='])
         else:
             return TexExpr(self.get_val() != sympy.sympify(other), 
                            self.get_str() + [sympy.sympify(other)] + ['!='])
 
     def __neg__(self):
-        return TexExpr(-self.get_val(), self.get_str() + ['-u'])
+        return TexExpr(-self.get_val(), [*self.get_polis(), '-u'])#self.get_str() + ['-u'])
 
     def __pos__(self):
-        return TexExpr(+self.get_val(), self.get_str() + ['+u'])
+        return TexExpr(+self.get_val(), [*self.get_polis(), '+u'])#self.get_str() + ['+u'])
 
     def __invert__(self):
-        return TexExpr(~self.get_val(), self.get_str() + ['~u'])
+        return TexExpr(~self.get_val(), [*self.get_polis(), '~u'])#self.get_str() + ['~u'])
 
 class TexSymbol(TexMathOp):
     """
@@ -233,6 +236,9 @@ class TexSymbol(TexMathOp):
 
     def get_val(self):
         return self.sym
+    
+    def get_polis(self):
+        return [self]
 
     def __repr__(self):
         return self.sym.__repr__()
@@ -264,13 +270,19 @@ class TexExpr(TexMathOp):
             self.expr = sympy.sympify(arg)
         else:
             self.expr = arg
-        self.polis = str_
+        self.polis = []
+        if str_ != None:
+            self.polis += str_
+        self._strict = None
 
     def get_str(self):
         return self.polis
 
     def get_val(self):
         return self.expr
+    
+    def get_polis(self):
+        return self.polis
 
     def __repr__(self):
         return self.expr.__repr__()
@@ -287,12 +299,36 @@ class TexExpr(TexMathOp):
         
         else:
             return None ##
+
+    def strict(self):
+        polis = []
+        self.is_strict = True
+        for x in self.polis:
+            if type(x) in classes:
+                polis.append(latex(x))
+            else:
+                polis.append(x)
+        self._strict = rpn_to_infix(polis)
+        return self
+        
+    def diff(self, args=None):
+        return sympy.diff(self.expr, *args)
         
     #def __call__(self, x):
     #    return self.expr.subs()
 
 class TexNumber(TexMathOp):
-    """docstring for TexNumber333"""
+    """
+    Class, representing numbers.
+    ### Init args:
+        ```arg: str``` - number as string or any python type
+    ### Examples:\n 
+    ```
+        x = TexNumber(1)
+        y = TexSymbol('1.5431')
+        y.float(2)  # 1.54
+    ```
+    """
     def __init__(self, arg):
         #super(TexNumber, self).__init__()
 
@@ -310,6 +346,9 @@ class TexNumber(TexMathOp):
             return float(self.num)
         else:
             return float("{:.2f}".format(self.num, lim=lim))
+        
+    def get_polis(self):
+        return [self]
 
     def __repr__(self):
         return self.num.__repr__()
@@ -318,7 +357,15 @@ class TexNumber(TexMathOp):
         return self.num.__str__()
 
 class TexFraction(TexMathOp):
-    """docstring for TexFraction"""
+    """
+    Class, representing fractions.
+    ### Init args:
+        ```arg: str``` - most likely to be a string, or TexObject
+    ### Examples:\n 
+    ```
+        x = TexFraction('3/4')
+    ```
+    """
     def __init__(self, arg):
         #super(TexNumber, self).__init__()
 
@@ -350,6 +397,9 @@ class TexFraction(TexMathOp):
     def line(self):
         self._slash = False
         return self
+    
+    def get_polis(self):
+        return [self]
 
     def __repr__(self):
         return self.num.__repr__()
@@ -358,7 +408,16 @@ class TexFraction(TexMathOp):
         return self.num.__str__()
 
 class TexMatrix(TexMathOp):
-    """docstring for TexMatrix"""
+    """
+    Class, representing matrices.
+    ### Init args:
+        ```arg: list``` - list, may be string
+    ### Examples:\n 
+    ```
+        x1 = TexMatrix('[[1, -1], [3, 4]]')
+        x2 = TexMatrix([[1, 0], [0, 0]])
+    ```
+    """
     def __init__(self, arg):
         #super(TexNumber, self).__init__()
 
@@ -380,6 +439,9 @@ class TexMatrix(TexMathOp):
         self.brackets = '||'
         return self
     
+    def get_polis(self):
+        return [self]
+    
     def __repr__(self):
         return self.mat.__repr__()
 
@@ -388,7 +450,18 @@ class TexMatrix(TexMathOp):
     
 
 class TexFunction(TexMathOp):
-
+    """
+    Class, representing functions.
+    ### Init args:
+        ```name = 'f': str```\n
+        ```f_args = None: list[str]```\n
+        ```val = None: str```
+    ### Examples:\n 
+    ```
+        F = TexFunction(name='F', f_args=['x'], val='sin(x)')
+        G = TexFunction(name='G')
+    ```
+    """
     def __init__(self, name = 'f', f_args = None, val = None):
 
         self.name = name
@@ -411,7 +484,8 @@ class TexFunction(TexMathOp):
     def drop_arg(self):
         return sympy.Function(self.name)
     
-    def diff(self, *args):
+    def diff(self, args=None):
+        if args == None: args = self.f_args
         return self.func.diff(*args)
     
     def d(self, n=1):
@@ -423,6 +497,9 @@ class TexFunction(TexMathOp):
 
     def get_val(self):
         return self.func
+    
+    def get_polis(self):
+        return [self]
     
     def __repr__(self):
         return self.func.__repr__()
@@ -456,7 +533,10 @@ def latex(x):
 
 @dispatch(TexExpr)
 def latex(x):
-    text = sympy.sympify(x.get_val())
+    if x._strict:
+        return x._strict.replace('*', '').replace('(', '\\left(').replace(')', '\\right)')
+    else:
+        text = sympy.sympify(x.get_val())
     return sympy.latex(text)
 
 @dispatch(TexFraction)
