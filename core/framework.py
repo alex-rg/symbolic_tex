@@ -514,6 +514,19 @@ class TexFunction(TexMathOp):
 
 classes = [TexFraction, TexNumber, TexExpr, TexSymbol, TexMatrix, TexFunction]
 
+'''
+def Generate(cnt: int, code: str, iter_num = None):
+
+    last_el = ""
+    for line in code[::-1]:
+        if line[0] != " " and line[0] != "\t" and line[0] != "\n":
+            last_el = line
+            break
+
+    res_dict = {"code": (code + '\n')*cnt, "last_el": last_el}
+
+    return res_dict
+'''
 """
 to do:
 для выражений, сделать так: по полису строить само выражение

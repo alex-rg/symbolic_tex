@@ -1,4 +1,6 @@
 # symbolic_tex
+## [Документация к коду](https://korolev-am.github.io/symbolic_tex_docs/index.html)
+
 Tex preprocessor with symbolic computations
 
 Программа состоит из двух частей:

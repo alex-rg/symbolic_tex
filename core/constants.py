@@ -29,4 +29,6 @@ def interpreter():
         return "python"
     else:
         ".venv/bin/python"
+
+gen_default_params = {'count' : 1, 'enumerate': 'column'}
     
